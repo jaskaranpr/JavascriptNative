@@ -15,6 +15,18 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        externalNativeBuild {
+            cmake {
+                cppFlags("-std=c++17")
+                arguments("-DANDROID_STL=c++_shared")
+            }
+        }
+
+        ndk {
+            //noinspection ChromeOsAbiSupport
+            abiFilters += listOf("arm64-v8a")  // Match your Skia build architecture
+        }
     }
 
     buildTypes {
@@ -42,6 +54,8 @@ android {
     buildFeatures {
         viewBinding = true
     }
+
+    ndkVersion = "25.2.9519653"
 }
 
 dependencies {

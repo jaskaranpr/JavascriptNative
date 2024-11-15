@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$/.." vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/buildtools" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/abseil-cpp" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/angle2" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/brotli" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/d3d12allocator" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/dawn" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/dng_sdk" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/egl-registry" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/emsdk" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/expat" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/freetype" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/freetype/subprojects/dlg" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/harfbuzz" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/highway" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/icu" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/icu4x" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/imgui" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/jinja2" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/libavif" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/libgav1" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/libgrapheme" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/libjpeg-turbo" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/libjxl" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/libpng" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/libwebp" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/libyuv" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/markupsafe" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/microhttpd" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/oboe" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/opengl-registry" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/partition_alloc" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/perfetto" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/piex" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/spirv-cross" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/spirv-headers" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/spirv-tools" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/swiftshader" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/unicodetools" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/vello" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/vulkan-deps" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/vulkan-headers" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/vulkan-tools" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/vulkan-utility-libraries" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/vulkanmemoryallocator" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/wuffs" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/skia/third_party/externals/zlib" vcs="Git" />
+  </component>
+</project>
