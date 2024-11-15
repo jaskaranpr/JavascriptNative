@@ -2,98 +2,71 @@
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
 #include <android/log.h>
-#include <cstring>
+#include "include/core/SkCanvas.h"
+#include "include/core/SkSurface.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkBitmap.h"
 
-#define LOG_TAG "SkiaWrapper"
+#define LOG_TAG "SkiaDrawing"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
-
-// Color helper functions
-inline uint32_t makeColor(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255) {
-    return (a << 24) | (b << 16) | (g << 8) | r;
-}
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_example_javascriptnative_skia_SkiaWrapper_nativeDraw(
         JNIEnv* env, jobject /* this */, jobject surface) {
 
-    if (!env || !surface) {
-        LOGE("Invalid input parameters");
-        return;
-    }
-
-    LOGI("Starting native draw");
-
-    // Get native window
+    // Obtain the native window from the Java Surface
     ANativeWindow* window = ANativeWindow_fromSurface(env, surface);
     if (!window) {
-        LOGE("Failed to get native window");
+        LOGE("Could not get native window");
         return;
     }
 
-    // Configure the buffer format
-    ANativeWindow_setBuffersGeometry(window, 0, 0, WINDOW_FORMAT_RGBA_8888);
-
-    // Get window dimensions
     int32_t width = ANativeWindow_getWidth(window);
     int32_t height = ANativeWindow_getHeight(window);
+    LOGI("Window dimensions: width=%d, height=%d", width, height);
 
-    if (width <= 0 || height <= 0) {
-        LOGE("Invalid dimensions: %dx%d", width, height);
+    // Configure the native window buffer format
+    if (ANativeWindow_setBuffersGeometry(window, width, height, WINDOW_FORMAT_RGBA_8888) != 0) {
+        LOGE("Failed to set buffer geometry");
         ANativeWindow_release(window);
         return;
     }
 
-    LOGI("Window dimensions: %dx%d", width, height);
-
-    // Lock buffer
+    // Lock the buffer for drawing
     ANativeWindow_Buffer buffer;
-    if (ANativeWindow_lock(window, &buffer, nullptr) != 0) {
-        LOGE("Failed to lock window buffer");
+    if (ANativeWindow_lock(window, &buffer, nullptr) < 0) {
+        LOGE("Failed to lock native window buffer");
         ANativeWindow_release(window);
         return;
     }
 
-    // Verify buffer
-    if (!buffer.bits) {
-        LOGE("Null buffer bits");
+    // Set up Skia Bitmap backed by the native buffer
+    SkBitmap bitmap;
+    SkImageInfo imageInfo = SkImageInfo::MakeN32Premul(width, height);
+    if (!bitmap.installPixels(imageInfo, buffer.bits, buffer.stride * 4)) {
+        LOGE("Failed to install pixels on SkBitmap");
         ANativeWindow_unlockAndPost(window);
         ANativeWindow_release(window);
         return;
     }
 
-    // Fill buffer with a test pattern
-    uint32_t* pixels = static_cast<uint32_t*>(buffer.bits);
-    int32_t stride = buffer.stride;
+    // Create a canvas to draw on the bitmap
+    SkCanvas canvas(bitmap);
 
-    for (int32_t y = 0; y < buffer.height; y++) {
-        for (int32_t x = 0; x < buffer.width; x++) {
-            // Create a gradient pattern
-            uint8_t r = static_cast<uint8_t>((x * 255) / buffer.width);
-            uint8_t g = static_cast<uint8_t>((y * 255) / buffer.height);
-            uint8_t b = 255;
+    // Clear the canvas with white
+    SkPaint bgPaint;
+    bgPaint.setColor(SK_ColorWHITE);
+    canvas.drawPaint(bgPaint);
 
-            // Draw a white border
-            if (x < 2 || x >= buffer.width - 2 ||
-                y < 2 || y >= buffer.height - 2) {
-                pixels[y * stride + x] = makeColor(255, 255, 255); // White
-            }
-                // Draw a central rectangle
-            else if (x > width/4 && x < 3*width/4 &&
-                     y > height/4 && y < 3*height/4) {
-                pixels[y * stride + x] = makeColor(0, 0, 255); // Blue
-            }
-                // Fill the rest with the gradient
-            else {
-                pixels[y * stride + x] = makeColor(r, g, b);
-            }
-        }
-    }
+    // Draw a blue circle in the center
+    SkPaint circlePaint;
+    circlePaint.setColor(SK_ColorBLUE);
+    circlePaint.setAntiAlias(true);
+    canvas.drawCircle(static_cast<float>(width) / 2.0f, static_cast<float>(height) / 2.0f, 100.0f, circlePaint);
 
-    LOGI("Buffer filled successfully");
-
-    // Unlock and cleanup
+    // Finalize and post buffer
     ANativeWindow_unlockAndPost(window);
     ANativeWindow_release(window);
-    LOGI("Drawing completed");
+    LOGI("Drawing complete");
 }
