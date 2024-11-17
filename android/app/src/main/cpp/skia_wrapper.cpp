@@ -89,7 +89,7 @@ static JSValue js_drawRect(JSContext* ctx, JSValueConst this_val, int argc, JSVa
 }
 
 extern "C" JNIEXPORT void JNICALL Java_com_example_javascriptnative_skia_SkiaWrapper_nativeDrawWithJS(
-        JNIEnv* env, jobject /* this */, jobject surface) {
+        JNIEnv* env, jobject /* this */, jobject surface, jstring jsCode) {
 
     // Get native window with RAII
     ScopedWindow window(ANativeWindow_fromSurface(env, surface));
@@ -150,8 +150,6 @@ extern "C" JNIEXPORT void JNICALL Java_com_example_javascriptnative_skia_SkiaWra
     js.addConstant("SCREEN_HEIGHT", height);
 
     // Execute JavaScript with proper cleanup
-    val jsCode = context.assets.open("drawing.js").bufferedReader().use { it.readText() }
-    skiaWrapper.nativeDrawWithJS(surface, jsCode)
     const char* code = env->GetStringUTFChars(jsCode, nullptr);
     std::string error;
     if (!js.evaluate(code, &error)) {
