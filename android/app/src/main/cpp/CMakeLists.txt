@@ -3,8 +3,9 @@ cmake_minimum_required(VERSION 3.22.1)
 project("javascriptnative")
 
 # Set paths
-set(SKIA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../skia)
-set(CPP_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(SKIA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs/skia)
+set(LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs)
+set(QUICKJS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs/quickjs)
 
 # Set up architecture-specific settings for M2
 # set(CMAKE_SYSTEM_PROCESSOR aarch64)
@@ -16,8 +17,9 @@ include_directories(
     ${SKIA_DIR}/include
     ${SKIA_DIR}/include/core
     ${SKIA_DIR}/include/config
-    ${CPP_DIR}
-    ${CPP_DIR}/include
+    ${QUICKJS_DIR}
+    ${LIBS_DIR}
+    ${QUICKJS_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
