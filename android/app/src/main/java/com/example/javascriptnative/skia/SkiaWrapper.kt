@@ -1,6 +1,7 @@
 package com.example.javascriptnative.skia
 
 import android.content.Context
+import android.content.res.AssetManager
 import android.util.Log
 import android.view.Surface
 import android.view.SurfaceHolder
@@ -8,7 +9,7 @@ import android.view.SurfaceView
 import android.graphics.PixelFormat
 
 class SkiaWrapper {
-    external fun nativeDrawWithJS(surface: Surface, jsCode: String)
+    external fun nativeDrawWithJS(surface: Surface, assetManager: AssetManager, jsFileName: String)
 
     companion object {
         init {
@@ -19,26 +20,12 @@ class SkiaWrapper {
                 Log.e("SkiaWrapper", "Failed to load library", e)
             }
         }
-
-        // Default JavaScript drawing code
-        const val DEFAULT_JS_CODE = """
-            // Clear background to white
-            setColor(WHITE);
-            drawRect(0, 0, 1000, 2000);
-            
-            // Draw some shapes
-            setColor(BLUE);
-            drawCircle(250, 250, 100);
-            
-            setColor(RED);
-            drawRect(100, 100, 150, 150);
-        """
     }
 }
 
 class SkiaView @JvmOverloads constructor(
     context: Context,
-    private var jsCode: String = SkiaWrapper.DEFAULT_JS_CODE
+    private var jsFileName: String = "app.js"
 ) : SurfaceView(context), SurfaceHolder.Callback {
 
     private val skiaWrapper = SkiaWrapper()
@@ -50,8 +37,8 @@ class SkiaView @JvmOverloads constructor(
         holder.setFormat(PixelFormat.RGBA_8888)
     }
 
-    fun setJavaScriptCode(code: String) {
-        jsCode = code
+    fun setJavaScriptFile(fileName: String) {
+        jsFileName = fileName
         if (isSurfaceValid && !isDrawing) {
             requestDraw()
         }
@@ -64,7 +51,7 @@ class SkiaView @JvmOverloads constructor(
             if (surface.isValid) {
                 try {
                     isDrawing = true
-                    skiaWrapper.nativeDrawWithJS(surface, jsCode)
+                    skiaWrapper.nativeDrawWithJS(surface, context.assets, jsFileName)
                 } catch (e: Exception) {
                     Log.e(TAG, "Drawing failed", e)
                 } finally {
@@ -104,12 +91,5 @@ class SkiaView @JvmOverloads constructor(
 
     companion object {
         private const val TAG = "SkiaView"
-
-        // JavaScript color constants
-        const val RED = "RED"
-        const val GREEN = "GREEN"
-        const val BLUE = "BLUE"
-        const val BLACK = "BLACK"
-        const val WHITE = "WHITE"
     }
 }

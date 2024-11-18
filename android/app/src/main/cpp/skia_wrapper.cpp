@@ -2,11 +2,14 @@
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
 #include <android/log.h>
+#include <android/asset_manager.h>
+#include <android/asset_manager_jni.h>
 #include "include/core/SkCanvas.h"
 #include "include/core/SkSurface.h"
 #include "include/core/SkPaint.h"
 #include "include/core/SkBitmap.h"
 #include "include/core/SkColor.h"
+#include "include/core/SkFont.h"
 #include "include/core/SkPath.h"
 #include "quickjs_wrapper.h"
 
@@ -88,8 +91,56 @@ static JSValue js_drawRect(JSContext* ctx, JSValueConst this_val, int argc, JSVa
     return JS_UNDEFINED;
 }
 
+static JSValue js_drawText(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+    if (argc < 3 || argc > 5) return JS_EXCEPTION; // At least text, x, and y are required
+
+    auto* drawCtx = static_cast<DrawingContext*>(JS_GetContextOpaque(ctx));
+
+    // Extract text, x, and y
+    const char* text;
+    size_t textLen;
+    text = JS_ToCStringLen(ctx, &textLen, argv[0]);
+    if (!text) return JS_EXCEPTION;
+
+    double x, y;
+    JS_ToFloat64(ctx, &x, argv[1]);
+    JS_ToFloat64(ctx, &y, argv[2]);
+
+    // Optional parameters: font size and color
+    double fontSize = 16.0; // Default font size
+    SkColor color = SK_ColorBLACK; // Default color
+    if (argc > 3) JS_ToFloat64(ctx, &fontSize, argv[3]);
+    if (argc > 4) {
+        uint32_t colorValue;
+        if (JS_ToUint32(ctx, &colorValue, argv[4]) == -1) {
+            JS_FreeCString(ctx, text);
+            return JS_EXCEPTION;
+        }
+        color = static_cast<SkColor>(colorValue);
+    }
+
+    // Configure the paint object
+    SkPaint paint = drawCtx->paint; // Use the existing paint object
+    paint.setAntiAlias(true);
+    paint.setColor(color);
+
+    // Configure the font
+    SkFont font;
+    font.setSize(fontSize);
+
+    // Render the text
+    drawCtx->canvas->drawString(text, x, y, font, paint);
+
+    // Free allocated text string
+    JS_FreeCString(ctx, text);
+
+    return JS_UNDEFINED;
+}
+
+
+
 extern "C" JNIEXPORT void JNICALL Java_com_example_javascriptnative_skia_SkiaWrapper_nativeDrawWithJS(
-        JNIEnv* env, jobject /* this */, jobject surface, jstring jsCode) {
+        JNIEnv* env, jobject thiz, jobject surface, jobject assetManager, jstring jsFileName) {
 
     // Get native window with RAII
     ScopedWindow window(ANativeWindow_fromSurface(env, surface));
@@ -110,8 +161,8 @@ extern "C" JNIEXPORT void JNICALL Java_com_example_javascriptnative_skia_SkiaWra
 
     // Create buffer with RAII
     ScopedBuffer bufferGuard(window.get());
-    ANativeWindow_Buffer buffer;
-    if (!bufferGuard.lock(buffer)) {
+    ANativeWindow_Buffer windowBuffer;  // Renamed from buffer to windowBuffer
+    if (!bufferGuard.lock(windowBuffer)) {
     LOGE("Failed to lock native window buffer");
     return;
     }
@@ -119,7 +170,7 @@ extern "C" JNIEXPORT void JNICALL Java_com_example_javascriptnative_skia_SkiaWra
     // Set up Skia Bitmap backed by the native buffer
     SkBitmap bitmap;
     SkImageInfo imageInfo = SkImageInfo::MakeN32Premul(width, height);
-    if (!bitmap.installPixels(imageInfo, buffer.bits, buffer.stride * 4)) {
+    if (!bitmap.installPixels(imageInfo, windowBuffer.bits, windowBuffer.stride * 4)) {
     LOGE("Failed to install pixels on SkBitmap");
     return;
     }
@@ -139,6 +190,7 @@ extern "C" JNIEXPORT void JNICALL Java_com_example_javascriptnative_skia_SkiaWra
     js.addFunction("setColor", js_setColor, 1);
     js.addFunction("drawCircle", js_drawCircle, 3);
     js.addFunction("drawRect", js_drawRect, 4);
+    js.addFunction("drawText", js_drawText, 5);
 
     // Add color constants
     js.addConstant("RED", SK_ColorRED);
@@ -149,16 +201,39 @@ extern "C" JNIEXPORT void JNICALL Java_com_example_javascriptnative_skia_SkiaWra
     js.addConstant("SCREEN_WIDTH", width);
     js.addConstant("SCREEN_HEIGHT", height);
 
-    // Execute JavaScript with proper cleanup
-    const char* code = env->GetStringUTFChars(jsCode, nullptr);
+    // Get JavaScript code from asset file
+    AAssetManager* mgr = AAssetManager_fromJava(env, assetManager);
+    if (!mgr) {
+    LOGE("Could not get asset manager");
+    return;
+    }
+
+    const char* filename = env->GetStringUTFChars(jsFileName, nullptr);
+    AAsset* asset = AAssetManager_open(mgr, filename, AASSET_MODE_BUFFER);
+    env->ReleaseStringUTFChars(jsFileName, filename);
+
+    if (!asset) {
+    LOGE("Could not open asset");
+    return;
+    }
+
+    // Read the JavaScript file content
+    long size = AAsset_getLength(asset);
+    char* jsContentBuffer = new char[size + 1];  // Renamed from buffer to jsContentBuffer
+    AAsset_read(asset, jsContentBuffer, size);
+    jsContentBuffer[size] = '\0';
+    AAsset_close(asset);
+
+    // Execute JavaScript
     std::string error;
-    if (!js.evaluate(code, &error)) {
+    if (!js.evaluate(jsContentBuffer, &error)) {
     LOGE("JavaScript error: %s", error.c_str());
     }
-    env->ReleaseStringUTFChars(jsCode, code);
+
+    delete[] jsContentBuffer;
 
     // Copy pixels back to buffer
-    memcpy(buffer.bits, bitmap.getPixels(), bitmap.computeByteSize());
+    memcpy(windowBuffer.bits, bitmap.getPixels(), bitmap.computeByteSize());
 
     LOGI("Drawing complete");
 }
